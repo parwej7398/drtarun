@@ -2,21 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
+import logo from "@/public/Assets/logo.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-  return pathname === path;
-};
+    return pathname === path;
+  };
 
   return (
     <footer className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
+      {/* Background decorative elements */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur-3xl opacity-10"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-blue-400 to-cyan-400 rounded-full blur-3xl opacity-10"></div>
 
+      {/* Top Wave */}
       <div className="absolute top-0 left-0 right-0">
         <svg
           className="w-full h-12 text-gray-900"
@@ -30,27 +34,23 @@ const Footer = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          {/* Logo and About Section */}
           <div className="space-y-4">
             <Link
               href="/"
               className="flex items-center space-x-2 group cursor-pointer"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <div>
-                <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent block leading-tight">
-                  Dr. Tarun <span className="text-blue-400">Mittal</span>
-                </span>
-                <span className="text-xs text-gray-400 hidden sm:inline-block">
-                  Gold Medalist Urologist
-                </span>
+             
+              <div className="flex items-center gap-3">
+                {/* Logo Image */}
+                <Image
+                  src={logo}
+                  alt="Dr. Tarun Mittal - Gold Medalist Urologist"
+                  width={160}
+                  height={50}
+                  className="object-contain w-22 h-22 rounded-full transition-transform duration-300 group-hover:scale-105"
+                  priority
+                />
               </div>
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed">
@@ -63,6 +63,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 bg-white/10 hover:bg-[#1877f2] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+                aria-label="Facebook"
               >
                 <svg
                   className="w-4 h-4"
@@ -77,6 +78,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 bg-white/10 hover:bg-gradient-to-tr hover:from-[#f09433] hover:to-[#bc1888] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+                aria-label="Instagram"
               >
                 <svg
                   className="w-4 h-4"
@@ -91,6 +93,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 bg-white/10 hover:bg-[#0a66c2] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+                aria-label="LinkedIn"
               >
                 <svg
                   className="w-4 h-4"
@@ -103,6 +106,7 @@ const Footer = () => {
             </div>
           </div>
 
+          {/* Quick Links */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white mb-4 relative inline-block">
               Quick Links
@@ -124,7 +128,7 @@ const Footer = () => {
                 <Link
                   href="/about-us"
                   className={`text-gray-300 hover:text-blue-400 transition-colors duration-300 flex items-center gap-2 group ${
-                    isActive("/about") ? "text-blue-400" : ""
+                    isActive("/about-us") ? "text-blue-400" : ""
                   }`}
                 >
                   <span className="w-1 h-1 bg-blue-500 rounded-full group-hover:w-2 transition-all duration-300"></span>
@@ -167,6 +171,7 @@ const Footer = () => {
             </ul>
           </div>
 
+          {/* Contact Info */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white mb-4 relative inline-block">
               Contact Info
@@ -251,6 +256,7 @@ const Footer = () => {
             </ul>
           </div>
 
+          {/* Location Map */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white mb-4 relative inline-block">
               Our Location
@@ -311,6 +317,7 @@ const Footer = () => {
           </div>
         </div>
 
+        {/* Bottom Footer */}
         <div className="pt-8 mt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
