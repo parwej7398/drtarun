@@ -1,33 +1,67 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
+import logo from "@/public/Assets/logo.png";
+
+// Types
+interface FormData {
+  name: string;
+  age: string;
+}
+
+// Constants - moved outside component for better performance
+const NAV_ITEMS = [
+  { name: "Home", path: "/" },
+  { name: "About Us", path: "/about-us" },
+  { name: "Testimonial", path: "/testimonial" },
+  { name: "Blogs", path: "/blogs" },
+  { name: "Gallery", path: "/gallery" },
+] as const;
+
+const WHATSAPP_NUMBER = "919780890425";
+
+// Utility functions - pure functions for SSR compatibility
+const getCurrentDate = (): string => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getCurrentTime = (): string => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     age: "",
   });
+  const [currentDate, setCurrentDate] = useState<string>("");
+  const [currentTime, setCurrentTime] = useState<string>("");
   const pathname = usePathname();
 
-  // Get current date and time
-  const getCurrentDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
+  // Hydration-safe date/time initialization
+  useEffect(() => {
+    setCurrentDate(getCurrentDate());
+    setCurrentTime(getCurrentTime());
 
-  const getCurrentTime = () => {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
-  };
+    // Update time every minute
+    const interval = setInterval(() => {
+      setCurrentTime(getCurrentTime());
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,21 +71,19 @@ const Header = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const currentDate = getCurrentDate();
-    const currentTime = getCurrentTime();
+    const date = currentDate || getCurrentDate();
+    const time = currentTime || getCurrentTime();
 
     const message = `🏥 *Appointment Request with Dr. Tarun Mittal* 🏥%0A%0A
 *Patient Details:*%0A
 👤 *Name:* ${formData.name}%0A
 📅 *Age:* ${formData.age} years%0A
-📆 *Booking Date:* ${currentDate}%0A
-⏰ *Booking Time:* ${currentTime}%0A%0A
+📆 *Booking Date:* ${date}%0A
+⏰ *Booking Time:* ${time}%0A%0A
 *Doctor:* Dr. Tarun Mittal (Gold Medalist Urologist)%0A
 *Location:* Near Narula Diagnostic Centre, Medical College Mor, Rohtak-124001 (Haryana)`;
 
-    const whatsappNumber = "919780890425";
-    const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
-
+    const whatsappLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
     window.open(whatsappLink, "_blank");
     setIsPopupOpen(false);
 
@@ -61,22 +93,11 @@ const Header = () => {
     });
   };
 
-  // Navigation items with their paths
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "About Us", path: "/about-us" },
-    { name: "Testimonial", path: "/testimonial" },
-    { name: "Blogs", path: "/blogs" },
-    { name: "Gallery", path: "/gallery" },
-  ];
-
-  const isActive = (path: string) => {
-    return pathname === path;
-  };
+  const isActive = (path: string) => pathname === path;
 
   return (
     <>
-      {/* Global styles - moved outside header to avoid nesting */}
+      {/* Global styles */}
       <style>{`
         @keyframes slideDown {
           from {
@@ -118,68 +139,56 @@ const Header = () => {
       `}</style>
 
       <header className="bg-white shadow-xl sticky top-0 z-50">
-        {/* Top Bar - Premium Contact Bar (Desktop Only) */}
-        <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white py-2.5 px-4 hidden lg:block relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=2000')] opacity-5 bg-cover"></div>
-          <div className="max-w-7xl mx-auto flex justify-between items-center text-sm relative z-10">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-white/10 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                  </svg>
-                </div>
-                <span className="tracking-wide">
-                  Near Narula Diagnostic Centre, Medical College Mor,
-                  Rohtak-124001 (Haryana)
-                </span>
-              </div>
-              <div className="h-4 w-px bg-white/20"></div>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-white/10 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                  </svg>
-                </div>
-                <span className="tracking-wide">9780890425</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span className="text-emerald-300 font-medium">
-                  Emergency: 24/7
-                </span>
-              </span>
-              <div className="h-4 w-px bg-white/20"></div>
-              <span className="text-white/80 text-xs">
-                ⭐ Gold Medalist Urologist
-              </span>
-            </div>
-          </div>
-        </div>
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 lg:h-24">
-            {/* Mobile - Menu Button (Left Side) */}
-            <div className="flex lg:hidden items-center">
+          <div className="flex justify-between items-center h-16 lg:h-20">
+            {/* Logo Section - Desktop */}
+            <Link href="/" className="hidden lg:flex items-center group">
+              {/* <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-blue-700 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
+                <div className="relative w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-3xl transition-all duration-500 group-hover:scale-105 group-hover:rotate-3">
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                </div>
+              </div> */}
+              <div className="ml-4 relative">
+                <Image
+                  src={logo}
+                  alt="Dr. Tarun Mittal - Gold Medalist Urologist"
+                  width={200}
+                  height={70}
+                  className="object-contain rounded-full w-18 h-18 transition-transform duration-300 group-hover:scale-105"
+                  priority
+                />
+              </div>
+            </Link>
+
+            {/* Logo Section - Mobile (Left Side - Full Rounded) */}
+            <Link href="/" className="flex lg:hidden items-center">
+               <div className="ml-4 relative">
+                <Image
+                  src={logo}
+                  alt="Dr. Tarun Mittal - Gold Medalist Urologist"
+                  width={200}
+                  height={70}
+                  className="object-contain rounded-full w-12 h-12 transition-transform duration-300 group-hover:scale-105"
+                  priority
+                />
+              </div>
+            </Link>
+
+            {/* Mobile - Menu Button (Right Side) */}
+            <div className="flex lg:hidden items-center gap-2">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center group"
                 aria-label="Menu"
               >
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
                 <svg
                   className="w-5 h-5 text-gray-700 group-hover:text-blue-600 transition-colors duration-300"
                   fill="none"
@@ -205,68 +214,9 @@ const Header = () => {
               </button>
             </div>
 
-            {/* Logo Section - Desktop */}
-            <Link
-              href="/"
-              className="hidden lg:flex items-center group cursor-pointer"
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-700 rounded-2xl blur-md opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-                <div className="relative w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <svg
-                    className="w-7 h-7 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent tracking-tight">
-                    Dr. Tarun
-                  </span>
-                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent tracking-tight">
-                    Mittal
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[11px] font-semibold text-blue-600 tracking-wide">
-                    GOLD MEDALIST UROLOGIST
-                  </span>
-                  <div className="w-1 h-1 rounded-full bg-gray-400"></div>
-                  <span className="text-[11px] text-gray-500">
-                    MCH (PGIMS Rohtak)
-                  </span>
-                </div>
-              </div>
-            </Link>
-
-            {/* Logo Section - Mobile */}
-            <Link href="/" className="flex lg:hidden items-center">
-              <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-md">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <div className="ml-2">
-                <span className="text-base font-bold text-gray-800">
-                  Dr. Tarun Mittal
-                </span>
-                <span className="text-[9px] text-blue-600 block -mt-0.5">
-                  Gold Medalist Urologist
-                </span>
-              </div>
-            </Link>
-
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-10">
-              {navItems.map((item) => (
+              {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.name}
                   href={item.path}
@@ -279,12 +229,12 @@ const Header = () => {
                     className={`absolute -bottom-1.5 left-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-300 ${
                       isActive(item.path) ? "w-full" : "w-0 group-hover:w-full"
                     }`}
-                  ></span>
+                  />
                 </Link>
               ))}
             </nav>
 
-            {/* ✅ CTA Button - Desktop - NOW LINKS TO APPOINTMENT PAGE */}
+            {/* CTA Button - Desktop */}
             <div className="hidden lg:block">
               <Link
                 href="/appointment"
@@ -306,33 +256,7 @@ const Header = () => {
                   </svg>
                   Book Appointment
                 </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
-              </Link>
-            </div>
-
-            {/* ✅ Mobile - Appointment Button - NOW LINKS TO APPOINTMENT PAGE */}
-            <div className="flex lg:hidden items-center">
-              <Link
-                href="/appointment"
-                className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-xs shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-1.5"
-              >
-                <span className="relative z-10 flex items-center gap-1.5">
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  Book
-                </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               </Link>
             </div>
           </div>
@@ -341,7 +265,7 @@ const Header = () => {
           {isMenuOpen && (
             <div className="lg:hidden py-5 border-t border-gray-100 animate-slideDown">
               <nav className="flex flex-col space-y-2">
-                {navItems.map((item) => (
+                {NAV_ITEMS.map((item) => (
                   <Link
                     key={item.name}
                     href={item.path}
@@ -355,22 +279,39 @@ const Header = () => {
                     {item.name}
                   </Link>
                 ))}
-                {/* ✅ Added Appointment link in mobile menu */}
-                <Link
-                  href="/appointment"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="text-gray-700 font-semibold hover:text-blue-600 hover:pl-5 transition-all duration-300 py-3 rounded-xl hover:bg-blue-50 pl-4"
-                >
-                  Appointment
-                </Link>
+                {/* Book Appointment at the bottom of mobile menu */}
+                <div className="pt-4 mt-2 border-t border-gray-200">
+                  <Link
+                    href="/appointment"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3.5 rounded-xl font-bold shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 w-full"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      Book Appointment
+                    </span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                  </Link>
+                </div>
               </nav>
             </div>
           )}
         </div>
       </header>
 
-      {/* ⚠️ Popup Modal - Kept for quick appointment (optional) */}
-      {/* You can remove this if you only want to use the appointment page */}
+      {/* Popup Modal */}
       {isPopupOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto relative animate-slideUp shadow-2xl">
@@ -425,14 +366,14 @@ const Header = () => {
                   <div>
                     <p className="text-xs text-gray-500">Date</p>
                     <p className="text-sm font-semibold text-gray-800">
-                      {getCurrentDate()}
+                      {currentDate || "Loading..."}
                     </p>
                   </div>
-                  <div className="w-px h-8 bg-blue-200"></div>
+                  <div className="w-px h-8 bg-blue-200" />
                   <div>
                     <p className="text-xs text-gray-500">Time</p>
                     <p className="text-sm font-semibold text-gray-800">
-                      {getCurrentTime()}
+                      {currentTime || "Loading..."}
                     </p>
                   </div>
                 </div>

@@ -7,9 +7,9 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   const pathname = usePathname();
 
-  const isActive = (path) => {
-    return pathname === path;
-  };
+  const isActive = (path: string) => {
+  return pathname === path;
+};
 
   return (
     <footer className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
@@ -264,7 +264,7 @@ const Footer = () => {
                 width="100%"
                 height="200"
                 style={{ border: 0 }}
-                allowFullScreen=""
+                allowFullScreen={true}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="rounded-t-xl"

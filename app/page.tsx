@@ -1,36 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import doctor from "@/public/Assets/Doctor.jpeg";
 import AboutUs from "./about-us/page";
 import TestimonialsPage from "./testimonial/page";
 
+// Types
+interface FormData {
+  name: string;
+  age: string;
+}
+
+// Constants
+const WHATSAPP_NUMBER = "919780890425";
+const PHONE_NUMBER = "9780890425";
+
+// Utility functions - pure functions for SSR compatibility
+const getCurrentDate = (): string => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getCurrentTime = (): string => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
 const HeroSection = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     age: "",
   });
+  const [currentDate, setCurrentDate] = useState<string>("");
+  const [currentTime, setCurrentTime] = useState<string>("");
+  const [isMounted, setIsMounted] = useState(false);
 
-  const getCurrentDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
+  // Hydration-safe date/time initialization
+  useEffect(() => {
+    setIsMounted(true);
+    setCurrentDate(getCurrentDate());
+    setCurrentTime(getCurrentTime());
 
-  const getCurrentTime = () => {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
-  };
+    // Update time every minute
+    const interval = setInterval(() => {
+      setCurrentTime(getCurrentTime());
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleCallNow = () => {
-    window.location.href = "tel:9780890425";
+    window.location.href = `tel:${PHONE_NUMBER}`;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,21 +69,19 @@ const HeroSection = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const currentDate = getCurrentDate();
-    const currentTime = getCurrentTime();
+    const date = currentDate || getCurrentDate();
+    const time = currentTime || getCurrentTime();
 
     const message = `🏥 *Appointment Request* 🏥%0A%0A
 *Patient Details:*%0A
 👤 *Name:* ${formData.name}%0A
 📅 *Age:* ${formData.age} years%0A
-📆 *Booking Date:* ${currentDate}%0A
-⏰ *Booking Time:* ${currentTime}%0A%0A
+📆 *Booking Date:* ${date}%0A
+⏰ *Booking Time:* ${time}%0A%0A
 *Doctor:* Dr. Tarun Mittal (Gold Medalist Urologist)%0A
 *Location:* Near Narula Diagnostic Centre, Medical College Mor, Rohtak-124001 (Haryana)`;
 
-    const whatsappNumber = "919780890425";
-    const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
-
+    const whatsappLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
     window.open(whatsappLink, "_blank");
     setIsPopupOpen(false);
 
@@ -170,8 +196,8 @@ const HeroSection = () => {
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
                 Expert Urology
                 <br />
-                Care with{""}
-                {/* ✅ Premium Animated Name with Gradient and Underline */}
+                Care with
+                {/* Premium Animated Name with Gradient and Underline */}
                 <div className="relative inline-block mt-2">
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-amber-600 to-gray-900 bg-[length:200%_auto] animate-gradient font-bold">
                     Dr. Tarun Mittal
@@ -237,8 +263,6 @@ const HeroSection = () => {
                   Call Now
                 </button>
               </div>
-
-              
             </div>
 
             {/* Right Side - Doctor Image */}
@@ -505,14 +529,14 @@ const HeroSection = () => {
                   <div>
                     <p className="text-[10px] md:text-xs text-gray-500">Date</p>
                     <p className="text-xs md:text-sm font-semibold text-gray-800">
-                      {getCurrentDate()}
+                      {isMounted ? currentDate : "Loading..."}
                     </p>
                   </div>
                   <div className="w-px h-6 md:h-8 bg-amber-200"></div>
                   <div>
                     <p className="text-[10px] md:text-xs text-gray-500">Time</p>
                     <p className="text-xs md:text-sm font-semibold text-gray-800">
-                      {getCurrentTime()}
+                      {isMounted ? currentTime : "Loading..."}
                     </p>
                   </div>
                 </div>
@@ -587,8 +611,8 @@ const HeroSection = () => {
         </div>
       )}
 
-      <AboutUs/>
-      <TestimonialsPage/>
+      <AboutUs />
+      <TestimonialsPage />
     </>
   );
 };
